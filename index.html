@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bible Challenge 120</title>
+
+<meta name="theme-color" content="#3b82f6" />
+
+<style>
+body { margin:0; font-family: sans-serif; background:#f5f5f5; }
+header { position:fixed; top:0; left:0; right:0; height:60px; background:#3b82f6; color:white;
+ display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:bold; z-index:10; }
+#content { padding:70px 15px 80px; }
+nav { position:fixed; bottom:0; left:0; right:0; height:60px; background:white; border-top:1px solid #ddd; display:flex; }
+nav button { flex:1; border:none; background:none; font-size:14px; }
+
+.page { display:none; }
+.page.active { display:block; }
+
+.card { background:white; padding:15px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1); margin-bottom:15px; }
+
+.progress-bar { width:100%; height:16px; background:#ddd; border-radius:8px; overflow:hidden; }
+.progress-bar-inner { height:100%; width:0%; background:#3b82f6; }
+
+#todayRef { font-size: 1.6em; font-weight: bold; }
+#readBtn { font-size: 1.3em; padding: 10px; }
+.list-item { padding:8px 0; border-bottom:1px solid #eee; }
+</style>
+</head>
+
+<body>
+<header>Bible Challenge 120</header>
+
+<div id="content">
+
+<div id="home" class="page active">
+  <div class="card">
+    <h2><span id="todayDate"></span> の通読箇所</h2>
+    <div id="todayRef"></div>
+    <button id="readBtn">読みました</button>
+  </div>
+
+  <div class="card">
+    <h2>Good Servant</h2>
+    <div id="readers"></div>
+  </div>
+</div>
+
+<div id="today" class="page">
+  <div class="card">
+    <h2>120日プラン</h2>
+    <div id="allPlan"></div>
+  </div>
+</div>
+
+<div id="progress" class="page">
+  <div class="card">
+    <h2>進捗</h2>
+    <div class="progress-bar"><div id="bar" class="progress-bar-inner"></div></div>
+    <div id="progressText"></div>
+  </div>
+</div>
+
+<div id="admin" class="page">
+  <div class="card">
+    <h2>管理者設定</h2>
+    <input type="date" id="startInput">
+    <button id="saveStart">保存</button>
+  </div>
+</div>
+
+</div>
+
+<nav>
+  <button data-tab="home">Home</button>
+  <button data-tab="today">Plan</button>
+  <button data-tab="progress">Progress</button>
+  <button data-tab="admin">Admin</button>
+</nav>
+
+<script>
+
+/* ===== 120日プラン ===== */
+const plan = [
+"Day1 創1–10","Day2 創11–20","Day3 創21–30","Day4 創31–40","Day5 創41–50",
+"Day6 出1–10","Day7 出11–20","Day8 出21–30","Day9 出31–40","Day10 レビ1–10",
+
+"Day11 レビ11–20","Day12 レビ21–27+民1–3","Day13 民4–13","Day14 民14–23","Day15 民24–33",
+"Day16 民34–36+申1–7","Day17 申8–17","Day18 申18–27","Day19 申28–34+ヨシ1–3","Day20 ヨシ4–13",
+
+"Day21 ヨシ14–24+士1–2","Day22 士3–12","Day23 士13–21+ルツ","Day24 Ⅰサム1–10","Day25 Ⅰサム11–20",
+"Day26 Ⅰサム21–31+Ⅱサム1–2","Day27 Ⅱサム3–12","Day28 Ⅱサム13–22","Day29 Ⅱサム23–24+Ⅰ列1–8","Day30 Ⅰ列9–18",
+
+"Day31 Ⅰ列19–22+Ⅱ列1–6","Day32 Ⅱ列7–16","Day33 Ⅱ列17–25+Ⅰ歴1–2","Day34 Ⅰ歴3–12","Day35 Ⅰ歴13–22",
+"Day36 Ⅰ歴23–29+Ⅱ歴1–3","Day37 Ⅱ歴4–13","Day38 Ⅱ歴14–23","Day39 Ⅱ歴24–33","Day40 Ⅱ歴34–36+エズ1–6",
+
+"Day41 エズ7–10+ネヘ1–6","Day42 ネヘ7–13+エス1–4","Day43 エス5–10+ヨブ1–4","Day44 ヨブ5–14","Day45 ヨブ15–24",
+"Day46 ヨブ25–34","Day47 ヨブ35–42+詩1–3","Day48 詩4–13","Day49 詩14–23","Day50 詩24–33",
+
+"Day51 詩34–43","Day52 詩44–53","Day53 詩54–63","Day54 詩64–73","Day55 詩74–83",
+"Day56 詩84–93","Day57 詩94–103","Day58 詩104–113","Day59 詩114–123","Day60 詩124–133",
+
+"Day61 詩134–143","Day62 詩144–150+箴1–4","Day63 箴5–14","Day64 箴15–24","Day65 箴25–31+伝1–3",
+"Day66 伝4–12+雅","Day67 雅+イザ1–5","Day68 イザ6–15","Day69 イザ16–25","Day70 イザ26–35",
+
+"Day71 イザ36–45","Day72 イザ46–55","Day73 イザ56–65","Day74 イザ66+エレ1–8","Day75 エレ9–18",
+"Day76 エレ19–28","Day77 エレ29–38","Day78 エレ39–48","Day79 エレ49–52+哀1–2","Day80 哀3–5+エゼ1–6",
+
+"Day81 エゼ7–16","Day82 エゼ17–26","Day83 エゼ27–36","Day84 エゼ37–46","Day85 エゼ47–48+ダニ1–8",
+"Day86 ダニ9–12+ホセ","Day87 ホセ+ヨエル","Day88 アモス+オバ","Day89 ヨナ+ミカ","Day90 ナホム+ハバクク+ゼパ",
+
+"Day91 ハガイ+ゼカ1–8","Day92 ゼカ9–14+マラキ","Day93 マタイ1–10","Day94 マタイ11–20","Day95 マタイ21–28+マルコ1–2",
+"Day96 マルコ3–12","Day97 マルコ13–16+ルカ1–6","Day98 ルカ7–16","Day99 ルカ17–24+ヨハ1–2","Day100 ヨハ3–12",
+
+"Day101 ヨハ13–21+使1–2","Day102 使3–12","Day103 使13–22","Day104 使23–28+ロマ1–3","Day105 ロマ4–13",
+"Day106 ロマ14–16+Ⅰコリ1–7","Day107 Ⅰコリ8–16+Ⅱコリ1–3","Day108 Ⅱコリ4–13+ガラ","Day109 エペ+ピリ+コロ","Day110 テサ+テモテ",
+
+"Day111 テトス+ピレモン+ヘブ1–6","Day112 ヘブ7–13+ヤコブ",
+"Day113 Ⅰペテ+Ⅱペテ","Day114 Ⅰヨハネ1–5+Ⅱヨハ+Ⅲヨハ+ユダ",
+"Day115 黙1–3","Day116 黙4–6","Day117 黙7–10","Day118 黙11–14","Day119 黙15–18","Day120 黙19–22"
+];
+
+/* ===== 日付計算 ===== */
+let startDate = localStorage.getItem("startDate") || new Date().toISOString().slice(0,10);
+
+function calcDayIndex() {
+  return Math.min(119, Math.floor((new Date() - new Date(startDate)) / 86400000));
+}
+
+const dayIndex = calcDayIndex();
+
+document.getElementById("todayRef").textContent = plan[dayIndex];
+document.getElementById("allPlan").innerHTML = plan.join("<br>");
+
+document.getElementById("todayDate").textContent =
+  new Date().toLocaleDateString("ja-JP");
+
+/* ===== 進捗 ===== */
+document.getElementById("bar").style.width = ((dayIndex+1)/120*100)+"%";
+document.getElementById("progressText").textContent = `${dayIndex+1}/120 日`;
+
+/* ===== タブ ===== */
+document.querySelectorAll("nav button").forEach(btn=>{
+ btn.onclick = ()=>{
+   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+   document.getElementById(btn.dataset.tab).classList.add('active');
+ };
+});
+</script>
+
+</body>
+</html>
