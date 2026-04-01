@@ -1,7 +1,7 @@
 {
   "name": "Bible Challenge 120",
   "short_name": "BC120",
-  "start_url": "/bible-challenge1202/index.html"
+  "start_url": "/bible-challenge1202/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3b82f6",
